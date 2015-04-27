@@ -1,0 +1,20 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:id="@+id/an">
+
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:id="@+id/surface_view"
+        android:layout_above="@+id/button_container"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:id="@+id/button_container"
+        android:layout_alignParentBottom="true"
+        android:layout_height="80dp"></RelativeLayout>
+
+</RelativeLayout>
