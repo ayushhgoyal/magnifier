@@ -4,9 +4,13 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
+import android.widget.ZoomControls;
 
 import java.io.IOException;
 
@@ -18,6 +22,10 @@ public class MainActivity extends ActionBarActivity {
     SurfaceHolder surface_holder = null;
     SurfaceHolder.Callback sh_callback = null;
     private SurfaceView surfaceView;
+    private ZoomControls zoomControls;
+    private Camera.Parameters params;
+    private int currentZoomLevel = 0;
+    SeekBar seekBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +35,9 @@ public class MainActivity extends ActionBarActivity {
 
 
         surfaceView = (SurfaceView) findViewById(R.id.surface_view);
+//        zoomControls = (ZoomControls) findViewById(R.id.CAMERA_ZOOM_CONTROLS);
+        seekBar = (SeekBar) findViewById(R.id.CAMERA_ZOOM_CONTROLS);
 
-//        addContentView(surface_view, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 
         if (surface_holder == null) {
             surface_holder = surfaceView.getHolder();
@@ -52,12 +61,65 @@ public class MainActivity extends ActionBarActivity {
             public void surfaceCreated(SurfaceHolder holder) {
                 mCamera = Camera.open();
                 mCamera.setDisplayOrientation(90);
-//set camera to continually auto-focus
-                Camera.Parameters params = mCamera.getParameters();
-//*EDIT*//params.setFocusMode("continuous-picture");
-//It is better to use defined constraints as opposed to String, thanks to AbdelHady
+                //set camera to continually auto-focus
+                params = mCamera.getParameters();
                 params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+
                 mCamera.setParameters(params);
+
+                // zoom stuff
+
+                if (params.isZoomSupported()) {
+                    final int maxZoomLevel = params.getMaxZoom();
+                    Log.i("max ZOOM ", "is " + maxZoomLevel);
+//                    zoomControls.setIsZoomInEnabled(true);
+//                    zoomControls.setIsZoomOutEnabled(true);
+                    seekBar.setMax(maxZoomLevel);
+
+
+                    seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            if (fromUser) {
+                                currentZoomLevel = progress;
+                                params.setZoom(currentZoomLevel);
+                                mCamera.setParameters(params);
+                            }
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+
+//                    zoomControls.setOnZoomInClickListener(new View.OnClickListener() {
+//                        public void onClick(View v) {
+//                            if (currentZoomLevel < maxZoomLevel) {
+//                                currentZoomLevel = currentZoomLevel + 2;
+//                                //mCamera.startSmoothZoom(currentZoomLevel);
+//                                params.setZoom(currentZoomLevel);
+//                                mCamera.setParameters(params);
+//                            }
+//                        }
+//                    });
+//
+//                    zoomControls.setOnZoomOutClickListener(new View.OnClickListener() {
+//                        public void onClick(View v) {
+//                            if (currentZoomLevel > 0) {
+//                                currentZoomLevel = currentZoomLevel - 2;
+//                                params.setZoom(currentZoomLevel);
+//                                mCamera.setParameters(params);
+//                            }
+//                        }
+//                    });
+                } else
+                    zoomControls.setVisibility(View.GONE);
+
 
                 try {
                     mCamera.setPreviewDisplay(holder);
